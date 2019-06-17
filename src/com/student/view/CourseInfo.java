@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import com.student.AppConstants;
+import com.student.base.BaseDAO;
 import com.student.base.BaseDAO.CourseExistException;
 import com.student.base.BaseDAO.CourseNotFoundException;
 import com.student.base.BaseDAO.CourseSelectedException;
@@ -62,6 +63,8 @@ public class CourseInfo extends JDialog {
 
         JButton addBtn = new JButton(AppConstants.ADMIN_COURSEINFO_ADD);
         addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton modBtn = new JButton(AppConstants.ADMIN_COURSEINFO_MOD);
+        modBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton delBtn = new JButton(AppConstants.ADMIN_COURSEINFO_DEL);
         delBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton quitBtn = new JButton(AppConstants.ADMIN_COURSEINFO_QUIT);
@@ -70,10 +73,14 @@ public class CourseInfo extends JDialog {
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
         panel.add(addBtn);
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
+        panel.add(modBtn);
+        panel.add(Box.createRigidArea(new Dimension(100, 30)));
         panel.add(delBtn);
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
         panel.add(quitBtn);
 
+        
+        
         addBtn.addActionListener(new ActionListener() {
 
             @Override
@@ -82,6 +89,15 @@ public class CourseInfo extends JDialog {
                 ac.setVisible(true);
             }
         });
+        modBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ModCourse mc = new ModCourse(CourseInfo.this);
+				mc.setVisible(true);
+				
+			}
+		});
         delBtn.addActionListener(new ActionListener() {
 
             @Override
@@ -207,6 +223,110 @@ public class CourseInfo extends JDialog {
         }
     }
 
+    private class ModCourse extends JDialog{
+
+        private static final long serialVersionUID = 1L;
+
+        private JPanel contPanel;
+        private JTextField[] tFields;
+        private final String[] checkregex = {AppConstants.REGEX_CNAME,
+                AppConstants.REGEX_CREDIT, AppConstants.REGEX_CDEPT, AppConstants.REGEX_TNAME,AppConstants.REGEX_CNO};
+        private final boolean[] checknull = {false, false, true, true, true};
+
+        public ModCourse(CourseInfo frame) {
+            super(frame, AppConstants.ADMIN_COURSEINFO_MOD, true);
+            contPanel = new JPanel();
+            setContentPane(contPanel);
+            setLayout(new BorderLayout(5, 5));
+            setResizable(false);
+            setLocationRelativeTo(null);
+            setSize(310, 260);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+            initBtn();
+            initTable();
+        }
+
+        public void initBtn() {
+            JPanel panel = new JPanel();
+            JButton jb = new JButton(AppConstants.VERIFY);
+            JButton s_jb = new JButton(AppConstants.ADMIN_QUERY);
+            panel.add(s_jb);
+            panel.add(jb);
+            contPanel.add(panel, BorderLayout.SOUTH);
+            getRootPane().setDefaultButton(jb);
+            
+            s_jb.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String [][]rs = AdminDAO.getInstance().queryCourse(tFields[0].getText());
+					for (int i = 1; i < tFields.length; i++) {
+						tFields[i].setText(rs[0][i]);
+					}
+				}
+			});
+            jb.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String[] info = new String[5];
+                    for (int i = 0; i < 5; i++) {
+                        info[i] = tFields[(i+1)%5].getText();
+                    }
+                    boolean isVaild = true;
+                    for (int i = 0; i < 5; i++) {
+                        if (Pattern.matches(checkregex[i], info[i]) == false) {
+                            isVaild = false;
+                            tFields[i].setBackground(Color.PINK);
+                        } else {
+                            tFields[i].setBackground(Color.WHITE);
+                        }
+                        if (checknull[i] && info[i].equals("")) {
+                            info[i] = null;
+                        }
+                    }
+                    if (!isVaild) {
+                        return;
+                    }
+                    try {
+                        AdminDAO.getInstance().ModCourse(info);
+                    } catch (CourseExistException e1) {
+                        JOptionPane.showMessageDialog(null, AppConstants.ADMIN_CNO_EXIST_ERROR,
+                                AppConstants.ERROR, JOptionPane.ERROR_MESSAGE);
+                        return;
+                    } catch (CourseNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (CourseSelectedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+                    dispose();
+                    CourseInfo.this.genTable();
+                }
+            });
+        }
+
+        public void initTable() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 15));
+            JPanel[] panels = new JPanel[5];
+            JLabel[] labels = new JLabel[5];
+            tFields = new JTextField[5];
+            for (int i = 0; i < 5; i++) {
+                panels[i] = new JPanel();
+                panels[i].setLayout(new GridLayout(1, 2, 5, 5));
+                labels[i] = new JLabel(infocolumn[i]);
+                tFields[i] = new JTextField(10);
+                panels[i].add(labels[i], Component.CENTER_ALIGNMENT);
+                panels[i].add(tFields[i], Component.CENTER_ALIGNMENT);
+                panel.add(panels[i]);
+            }
+            contPanel.add(panel, BorderLayout.CENTER);
+        }
+    }
+    
+    
     private class DelCourse extends JDialog {
 
         private static final long serialVersionUID = 1L;

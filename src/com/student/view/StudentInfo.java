@@ -21,6 +21,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import com.student.AppConstants;
+import com.student.base.BaseDAO.CourseExistException;
+import com.student.base.BaseDAO.CourseNotFoundException;
+import com.student.base.BaseDAO.CourseSelectedException;
 import com.student.base.BaseDAO.StudentExistException;
 import com.student.base.BaseDAO.StudentNotFoundException;
 import com.student.base.BaseDAO.StudentSelectedCourseException;
@@ -61,17 +64,17 @@ public class StudentInfo extends JDialog {
 
         JButton addBtn = new JButton(AppConstants.ADMIN_SUTDENTINFO_ADD);
         addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton modBtn = new JButton(AppConstants.ADMIN_SUTDENTINFO_MOD);
+        addBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton delBtn = new JButton(AppConstants.ADMIN_SUTDENTINFO_DEL);
         delBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JButton quitBtn = new JButton(AppConstants.EXIT);
-        quitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
         panel.add(addBtn);
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
-        panel.add(delBtn);
+        panel.add(modBtn);
         panel.add(Box.createRigidArea(new Dimension(100, 30)));
-        panel.add(quitBtn);
+        panel.add(delBtn);
 
         addBtn.addActionListener(new ActionListener() {
 
@@ -81,19 +84,21 @@ public class StudentInfo extends JDialog {
                 ac.setVisible(true);
             }
         });
+        modBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ModStudent ms = new ModStudent(StudentInfo.this);
+				ms.setVisible(true);
+				
+			}
+		});
         delBtn.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 DelStudent dc = new DelStudent(StudentInfo.this);
                 dc.setVisible(true);
-            }
-        });
-        quitBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
             }
         });
     }
@@ -159,21 +164,6 @@ public class StudentInfo extends JDialog {
                     for (int i = 0; i < 7; i++) {
                         info[i] = tFields[i].getText();
                     }
-                    boolean isValid = true;
-                    for (int i = 0; i < 7; i++) {
-                        if (Pattern.matches(checkregex[i], info[i]) == false) {
-                            isValid = false;
-                            tFields[i].setBackground(Color.PINK);
-                        } else {
-                            tFields[i].setBackground(Color.WHITE);
-                        }
-                        if (checknull[i] && info[i].equals("")) {
-                            info[i] = null;
-                        }
-                    }
-                    if (!isValid) {
-                        return;
-                    }
                     try {
                         AdminDAO.getInstance().AddStudent(info);
                     } catch (StudentExistException e1) {
@@ -209,7 +199,82 @@ public class StudentInfo extends JDialog {
             contPanel.add(panel, BorderLayout.CENTER);
         }
     }
+    private class ModStudent extends JDialog {
 
+        private static final long serialVersionUID = 1L;
+        private JPanel contPanel;
+        private JTextField[] tFields;
+        private final String[] checkregex = {AppConstants.REGEX_SNAME,
+                AppConstants.REGEX_SEX, AppConstants.REGEX_AGE, AppConstants.REGEX_SDEPT,
+                AppConstants.REGEX_USERNAME, AppConstants.REGEX_PASSWORD,AppConstants.REGEX_SNO};
+        private final boolean checknull[] = {false, true, true, true, false, false,false};
+
+        public ModStudent(StudentInfo frame) {
+            super(frame, AppConstants.ADMIN_SUTDENTINFO_MOD, true);
+            contPanel = new JPanel();
+            setContentPane(contPanel);
+            setLayout(new BorderLayout(5, 5));
+            setResizable(false);
+            setLocationRelativeTo(null);
+            setSize(310, 330);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+            initBtn();
+            initTable();
+        }
+
+        public void initBtn() {
+            JPanel panel = new JPanel();
+            JButton jb = new JButton(AppConstants.VERIFY);
+            JButton m_jb = new JButton(AppConstants.ADMIN_QUERY);
+            panel.add(m_jb);
+            panel.add(jb);
+            contPanel.add(panel, BorderLayout.SOUTH);
+            getRootPane().setDefaultButton(jb);
+            
+            m_jb.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String [][]rs = AdminDAO.getInstance().queryStudent(tFields[0].getText());
+					for (int i = 1; i < tFields.length; i++) {
+						tFields[i].setText(rs[0][i]);
+					}	
+				}
+			});
+            jb.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String[] info = new String[7];
+                    for (int i = 0; i < 7; i++) {
+                    	 info[i] = tFields[(i+1)%7].getText();
+                    }
+                    AdminDAO.getInstance().ModStudent(info);
+                    dispose();
+                    StudentInfo.this.genTable();
+                }
+            });
+        }
+
+        public void initTable() {
+            JPanel panel = new JPanel();
+            panel.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 15));
+            JPanel[] panels = new JPanel[7];
+            JLabel[] labels = new JLabel[7];
+            tFields = new JTextField[7];
+            for (int i = 0; i < 7; i++) {
+                panels[i] = new JPanel();
+                panels[i].setLayout(new GridLayout(1, 2, 5, 5));
+                labels[i] = new JLabel(infocolumn[i]);
+                tFields[i] = new JTextField(10);
+                panels[i].add(labels[i], Component.CENTER_ALIGNMENT);
+                panels[i].add(tFields[i], Component.CENTER_ALIGNMENT);
+                panel.add(panels[i]);
+            }
+            contPanel.add(panel, BorderLayout.CENTER);
+        }
+    }
     private class DelStudent extends JDialog {
 
         private static final long serialVersionUID = 1L;

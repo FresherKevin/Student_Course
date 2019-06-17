@@ -22,7 +22,8 @@ public class StudentDAO extends BaseDAO {
     public String queryForLogin(String username, String password) {
         String result = null;
         String sql = "select sno from student where username=? and password=?";
-        String[] param = {username, getSHA256(password)};
+        String[] param = {username, password};
+        System.out.println("username:"+username+" pass"+password);
         rs = db.executeQuery(sql, param);
         try {
             if (rs.next()) {

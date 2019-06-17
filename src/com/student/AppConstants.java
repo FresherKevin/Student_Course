@@ -7,12 +7,20 @@ package com.student;
  */
 public class AppConstants {
 
-    // JDBC
-    public static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    /* JDBC
+    public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     public static final String JDBC_URL = "jdbc:mysql://119.29.176.110:3306/school";
     public static final String JDBC_USERNAME = "db1";
     public static final String JDBC_PASSWORD = "shuacm";
-
+     */
+    public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    public static final String JDBC_URL = "jdbc:mysql://localhost:3306/school?useUnicode=true&characterEncoding=UTF-8";
+    public static final String JDBC_USERNAME = "kevin";
+    public static final String JDBC_PASSWORD = "19980910";
+    
+    
+    
+    
     // Login
     public static final String LOGIN_TITLE = "用户登录";
     public static final String LOGIN = "登录";
@@ -80,6 +88,7 @@ public class AppConstants {
 
     public static final String ADMIN_COURSEINFO_ADD = "新增课程";
     public static final String ADMIN_COURSEINFO_DEL = "删除课程";
+    public static final String ADMIN_COURSEINFO_MOD = "修改课程";
     public static final String ADMIN_COURSEINFO_QUIT = "退出";
     public static final String ADMIN_CNO_EXIST_ERROR = "不能添加，此课程号已存在！";
     public static final String ADMIN_CNO_NOTEXIST_ERROR = "不能删除，此课程号不存在！";
@@ -87,6 +96,7 @@ public class AppConstants {
 
     public static final String ADMIN_SUTDENTINFO = "学生信息";
     public static final String ADMIN_SUTDENTINFO_ADD = "添加学生";
+    public static final String ADMIN_SUTDENTINFO_MOD= "修改学生";
     public static final String ADMIN_SUTDENTINFO_DEL = "删除学生";
     public static final String ADMIN_SNO_EXIST_ERROR = "不能添加，此学号已存在！";
     public static final String ADMIN_USER_EXIST_ERROR = "不能研究，此用戶已存在！";

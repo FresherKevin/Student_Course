@@ -1,5 +1,6 @@
 package com.student.dao;
 
+import com.mysql.fabric.xmlrpc.base.Param;
 import com.student.base.BaseDAO;
 
 /**
@@ -61,7 +62,6 @@ public class AdminDAO extends BaseDAO {
         rs = db.executeQuery(sql, param);
         return buildResult();
     }
-
     /**
      * 
      * @Description: update a student's grade.
@@ -85,7 +85,14 @@ public class AdminDAO extends BaseDAO {
         String sql = "insert into course values(?,?,?,?,?)";
         db.executeUpdate(sql, prarm);
     }
-
+    public void ModCourse(String[] prarm) throws CourseExistException, CourseNotFoundException, CourseSelectedException {
+    	
+        String sql = "update course set cname=?,credit=?,cdept=?,tname=? where cno=?";
+        for (int i = 0; i < prarm.length; i++) {
+			System.out.println(prarm[i]);
+		}
+        db.executeUpdate(sql, prarm);
+    }
     /**
      *
      * @throws CourseNotFoundException
@@ -122,11 +129,18 @@ public class AdminDAO extends BaseDAO {
             throw new UserExistException();
         }
         String sql = "insert into student values(?,?,?,?,?,?,?)";
-        prarm[6] = getSHA256(prarm[6] + prarm[5]);
+        prarm[6] = prarm[6] + prarm[5];
         db.executeUpdate(sql, prarm);
 
     }
-
+    public void ModStudent(String[] prarm) {
+    	
+        String sql = "update student set sname=?,sex=?,age=?,sdept=?,username=?,password=? where sno=?";
+        for (int i = 0; i < prarm.length; i++) {
+			System.out.println(prarm[i]);
+		}
+        db.executeUpdate(sql, prarm);
+    }
     /**
      *
      * @throws StudentNotFoundException
